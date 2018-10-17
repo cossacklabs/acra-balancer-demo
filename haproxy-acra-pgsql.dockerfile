@@ -7,12 +7,12 @@ LABEL org.label-schema.schema-version="1.0" \
     org.label-schema.name="Acra + HAProxy + PostgreSQL Demo" \
     org.label-schema.description="Demonstrates HA and balancing between Acra instances" \
     com.cossacklabs.product.name="acra-haproxy-pgsql" \
-    com.cossacklabs.product.component="haproxy-pgsql" \
+    com.cossacklabs.product.component="haproxy-acra-pgsql" \
     com.cossacklabs.docker.container.type="product"
 
-EXPOSE 5432 5433
+EXPOSE 9393 9394
 
-COPY _scripts/haproxy-pgsql/docker-entrypoint.sh /docker-entrypoint.sh
+COPY _scripts/haproxy-acra-pgsql/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod 0755 /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
