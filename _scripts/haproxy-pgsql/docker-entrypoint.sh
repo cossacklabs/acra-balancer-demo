@@ -22,7 +22,7 @@ defaults
     timeout client 10800s
     timeout server 10800s
 
-listen  pgsql-rw
+listen pgsql-rw
     bind *:5432
     option httpchk GET /
     http-check expect string OK\ :\ master
@@ -31,7 +31,7 @@ listen  pgsql-rw
     server pgsql-master pgsql-master:5432 check
     server pgsql-slave pgsql-slave:5432 check
 
-listen  pgsql-ro
+listen pgsql-ro
     bind *:5433
     option httpchk GET /
     http-check expect string OK\ :

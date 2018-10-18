@@ -109,6 +109,10 @@ services:
             --db_host=pgsql-master
             --db_port=5432
             --keys_dir=/keys
+            --http_api_enable
+            --incoming_connection_api_string=tcp://0.0.0.0:9090
+            --config_file=/config/acra-server.yaml
+            --zonemode_enable
             -v
 
     acra-server-s:
@@ -131,6 +135,10 @@ services:
             --db_host=pgsql-slave
             --db_port=5432
             --keys_dir=/keys
+            --http_api_enable
+            --incoming_connection_api_string=tcp://0.0.0.0:9090
+            --config_file=/config/acra-server.yaml
+            --zonemode_enable
             -v
 
 
@@ -166,6 +174,7 @@ services:
             - haproxy
         ports:
             - "9494:9494"
+            - "9191:9191"
         environment:
             ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
         networks:
@@ -180,6 +189,8 @@ services:
             --keys_dir=/keys
             --client_id=${ACRA_CLIENT_ID:-testclientid}
             --incoming_connection_string=tcp://0.0.0.0:9494
+            --http_api_enable
+            --incoming_connection_api_string=tcp://0.0.0.0:9191
             -v
 
     acra-connector-ro:
@@ -191,6 +202,7 @@ services:
             - haproxy
         ports:
             - "9495:9494"
+            - "9192:9191"
         environment:
             ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
         networks:
@@ -205,6 +217,8 @@ services:
             --keys_dir=/keys
             --client_id=${ACRA_CLIENT_ID:-testclientid}
             --incoming_connection_string=tcp://0.0.0.0:9494
+            --http_api_enable
+            --incoming_connection_api_string=tcp://0.0.0.0:9191
             -v
 
 
