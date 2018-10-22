@@ -1,13 +1,14 @@
-# Intro
+# What is this?
 
-This demo discovers some of many possible variants of building HA and balanced
-infrastructure, based on Acra components, PostgreSQL and AcraPythonDemo. In our
-examples, as a balancer, we used HAProxy - one of the most popular proxies
-today.
+This demo discovers some of many possible variants of building high availability and balanced
+infrastructure, based on [Acra data protection suite](https://github.com/cossacklabs/acra) components, PostgreSQL and python application protected by Acra. In these examples we used [HAProxy](http://www.haproxy.org/) – one of the most popular high availability balancers today.
 
-These stands was created only for demonstration purposes and structure of
-examples was intentionally simplified, HAProxy configuration is optimized
-NOT for performance, but for clarity of tests.
+These stands was created only for demonstration purposes and structure of examples was intentionally simplified, HAProxy configuration is optimized NOT for performance, but for clarity of tests.
+
+This demo has two examples:
+
+| [One Acra Server, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composeacra-haproxy-pgsqlyml) | [Two Acra Servers, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composehaproxy-acra-pgsql_zonemodeyml) |
+|---|---|
 
 ---
 
