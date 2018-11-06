@@ -1,4 +1,4 @@
-FROM postgres:9.6
+FROM postgres:11
 
 # Include metadata, additionally use label-schema namespace
 LABEL org.label-schema.schema-version="1.0" \
