@@ -3,7 +3,7 @@
 This demo illustrates some of the many possible variants of building high availability and balanced
 infrastructures, based on [Acra data protection suite](https://github.com/cossacklabs/acra) components, PostgreSQL, and Python application protected by Acra. In these examples, we used [HAProxy](http://www.haproxy.org/) – one of the most popular high availability balancers today.
 
-These stands was created only for demonstration purposes and structure of examples was intentionally simplified, HAProxy configuration is optimized NOT for performance, but for clarity of tests.
+These stands were created only for demonstration purposes and structure of examples was intentionally simplified, HAProxy configuration is optimized NOT for performance, but for clarity of tests.
 
 This demo has two examples:
 
@@ -176,7 +176,7 @@ docker exec -it $DOCKER_PYTHON \
 
 ## Tests
 
-In this examples we have multiple running AcraServers and HAProxy that balancing
+In these examples we have multiple running AcraServers and HAProxy that balancing
 connections from AcraConnector. It is currently unsupported to manage multiple
 AcraServers through AcraWebConfig in that model and switch between modes
 `with zones` and `without zones` on the fly.
