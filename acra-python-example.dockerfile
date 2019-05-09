@@ -10,6 +10,9 @@ LABEL org.label-schema.schema-version="1.0" \
     com.cossacklabs.product.component="acra-python-example" \
     com.cossacklabs.docker.container.type="product"
 
+# Fix CVE-2019-5021
+RUN echo 'root:!' | chpasswd -e
+
 RUN apk update
 
 RUN apk add --no-cache bash python3 postgresql-dev postgresql-client
