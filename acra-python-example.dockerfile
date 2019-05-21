@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 # Include metadata, additionally use label-schema namespace
 LABEL org.label-schema.schema-version="1.0" \
@@ -10,6 +10,9 @@ LABEL org.label-schema.schema-version="1.0" \
     com.cossacklabs.product.component="acra-python-example" \
     com.cossacklabs.docker.container.type="product"
 
+# Fix CVE-2019-5021
+RUN echo 'root:!' | chpasswd -e
+
 RUN apk update
 
 RUN apk add --no-cache bash python3 postgresql-dev postgresql-client
@@ -17,6 +20,11 @@ RUN pip3 install --no-cache-dir --upgrade pip
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 RUN apk add gcc python3-dev musl-dev libxml2-dev git alpine-sdk rsync
+
+# TODO : remove when themis will fully support alpine
+RUN mkdir -p /usr/local/sbin
+RUN echo -e '#!/bin/sh\n\nexit 0\n' > /usr/local/sbin/ldconfig
+RUN chmod +x /usr/local/sbin/ldconfig
 
 # themis
 RUN cd /root \

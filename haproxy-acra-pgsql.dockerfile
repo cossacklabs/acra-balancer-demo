@@ -10,6 +10,9 @@ LABEL org.label-schema.schema-version="1.0" \
     com.cossacklabs.product.component="haproxy-acra-pgsql" \
     com.cossacklabs.docker.container.type="product"
 
+# Fix CVE-2019-5021
+RUN echo 'root:!' | chpasswd -e
+
 EXPOSE 9393 9394
 
 COPY _scripts/haproxy-acra-pgsql/docker-entrypoint.sh /docker-entrypoint.sh
