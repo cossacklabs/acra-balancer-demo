@@ -8,7 +8,9 @@ services:
         image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
         network_mode: "none"
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            # INSECURE!!! You MUST define your own ACRA_SERVER_MASTER_KEY and ACRA_CONNECTOR_MASTER_KEY
+            # The default is only for testing purposes
+            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         volumes:
             - ./.acrakeys:/keys
         command: >-
@@ -21,7 +23,7 @@ services:
         image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
         network_mode: "none"
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            ACRA_MASTER_KEY: ${ACRA_CONNECTOR_MASTER_KEY:-MElBVnhEeTd3b29JMFVVcnhGMXJPT3BxZUVwWW5wS3E=}
         volumes:
             - ./.acrakeys:/keys
         command: >-
@@ -34,7 +36,7 @@ services:
         image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
         network_mode: "none"
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         volumes:
             - ./.acrakeys:/keys
         command: >-
@@ -47,7 +49,7 @@ services:
         image: "cossacklabs/acra-authmanager:${ACRA_DOCKER_IMAGE_TAG:-latest}"
         network_mode: "none"
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         volumes:
             - ./.acrakeys:/keys
         command: >-
@@ -129,7 +131,7 @@ services:
             - acra-keymaker_writer
             - haproxy
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         networks:
             - acraserver-haproxy
             - acraconnector-acraserver
@@ -157,7 +159,7 @@ services:
         ports:
             - "9494:9494"
         environment:
-            ACRA_MASTER_KEY: ${ACRA_MASTER_KEY:-UHZ3VUNNeTJ0SEFhbWVjNkt4eDdVYkc2WnNpUTlYa0E=}
+            ACRA_MASTER_KEY: ${ACRA_CONNECTOR_MASTER_KEY:-MElBVnhEeTd3b29JMFVVcnhGMXJPT3BxZUVwWW5wS3E=}
         networks:
             - acraconnector-acraserver
             - acrawebconfig-acraconnector
