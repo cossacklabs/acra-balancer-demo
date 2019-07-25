@@ -1,7 +1,9 @@
 # What is this?
 
 This demo illustrates some of the many possible variants of building high availability and balanced
-infrastructures, based on [Acra data protection suite](https://github.com/cossacklabs/acra) components, PostgreSQL, and Python application protected by Acra. In these examples, we used [HAProxy](http://www.haproxy.org/) – one of the most popular high availability balancers today.
+infrastructures, based on [Acra data protection suite](https://cossacklabs.com/acra/) components, PostgreSQL, and Python application protected by Acra. In these examples, we used [HAProxy](http://www.haproxy.org/) – one of the most popular high availability balancers today.
+
+This project is one of numerous Acra's example applications. If you are curious about other Acra features, like transparent encryption, SQL firewall, load balancing support – [Acra Example Applications](https://github.com/cossacklabs/acra-engineering-demo/).
 
 These stands were created only for demonstration purposes and structure of examples was intentionally simplified, HAProxy configuration is optimized NOT for performance, but for clarity of tests.
 
@@ -262,3 +264,14 @@ docker exec -it $DOCKER_PYTHON \
 # id  - zone - data - raw_data
 # 1   - DDDDDDDDjzaErohiNAaYhChb - some data - some data
 ```
+
+# Further steps
+
+Let us know if you have any questions by dropping an email to [dev@cossacklabs.com](mailto:dev@cossacklabs.com).
+
+1. [Acra features](https://cossacklabs.com/acra/) – check out full features set and available licenses.
+2. Other [Acra example applications](https://github.com/cossacklabs/acra-engineering-demo/) – try other Acra features, like transparent encryption, SQL firewall, load balancing support.
+
+# Need help?
+
+Need help in configuring Acra? Our support is available for [Acra Pro and Acra Enterprise versions](https://www.cossacklabs.com/acra/#pricing).
