@@ -1,5 +1,7 @@
 # What is this?
 
+Learn how to build high availability and balanced infrastructures for AcraServer based on HAProxy.
+
 This demo illustrates some of the many possible variants of building high availability and balanced
 infrastructures, based on [Acra data protection suite](https://cossacklabs.com/acra/) components, PostgreSQL, and Python application protected by Acra. In these examples, we used [HAProxy](http://www.haproxy.org/) – one of the most popular high availability balancers today.
 
