@@ -24,19 +24,13 @@ defaults
 
 listen pgsql-rw
     bind *:5432
-    option httpchk GET /
-    http-check expect string OK\ :\ master
     balance roundrobin
-    default-server port 9000 inter 2s downinter 5s rise 3 fall 2 slowstart 60s maxconn 256 maxqueue 128 weight 100
     server pgsql-master pgsql-master:5432 check
     server pgsql-slave pgsql-slave:5432 check
 
 listen pgsql-ro
     bind *:5433
-    option httpchk GET /
-    http-check expect string OK\ :
     balance roundrobin
-    default-server port 9000 inter 2s downinter 5s rise 3 fall 2 slowstart 60s maxconn 256 maxqueue 128 weight 100
     server pgsql-master pgsql-master:5432 check
     server pgsql-slave pgsql-slave:5432 check
 EOF
