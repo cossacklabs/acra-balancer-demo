@@ -120,6 +120,8 @@ services:
             - ./.acrakeys/acra-server:/keys
             - ./.acraconfigs/acra-server:/config
             - ./ssl/acra-server/:/ssl
+        # explicitly specify PostgreSQL's SNI (tls_database_sni) due to acra connects to the haproxy by domain
+        # and it will proxy pgsql's TLS handshake as is with pgsql's certificate
         command: >-
             --db_host=haproxy
             --db_port=5432
@@ -156,6 +158,7 @@ services:
             EXAMPLE_DB_USER: ${POSTGRES_USER:-postgres}
             EXAMPLE_DB_PASSWORD: ${POSTGRES_PASSWORD:-test}
             EXAMPLE_DB_NAME: ${POSTGRES_DB:-test}
+            # sha512 of the certificate's distinguished name
             EXAMPLE_PUBLIC_KEY: "/app.acrakeys/28fa1ef8aa3184d7ce0621341299d74b5b561a95aecdee3b46b847d63495f800d276cdd1233f5950efb348113f2892ceef4b354abed383d8afc026901854ca28_storage.pub"
             EXAMPLE_SSL_MODE: verify-full
             EXAMPLE_TLS_ROOT_CERT: /ssl/root.crt

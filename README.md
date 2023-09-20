@@ -11,8 +11,8 @@ These stands were created only for demonstration purposes and structure of examp
 
 This demo has two examples:
 
-| [One Acra Server, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composeacra-haproxy-pgsqlyml) | [Two Acra Servers, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composehaproxy-acra-pgsql_zonemodeyml) |
-|--------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| [One Acra Server, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composeacra-haproxy-pgsqlyml) | [Two Acra Servers, two databases](https://github.com/cossacklabs/acra-balancer-demo#stand--docker-composehaproxy-acra-pgsqlyml) |
+|--------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 
 ---
 
@@ -142,13 +142,13 @@ docker exec -it $DOCKER_PYTHON python /app/example.py --print
 In these examples we have multiple running AcraServers and HAProxy that balancing
 connections from Python.
 
-### Python without zones
+### Python
 
 #### Start & Stop
 
 ```bash
 # Start
-docker-compose -f ./docker-compose.haproxy-acra-pgsql.yml up
+docker-compose -f ./docker-compose.haproxy-acra-pgsql.yml up --build
 
 # Stop, clean built images, remove keys
 docker-compose -f ./docker-compose.haproxy-acra-pgsql.yml down; \
@@ -167,9 +167,9 @@ DOCKER_PYTHON=$(docker ps \
     --filter "label=com.cossacklabs.product.component=acra-python-example" \
     --format "{{.Names}}") || echo 'Can not find container!'
 
-# Write through RW chain:  haproxy -> acra-server-(m|s) -> pgsql-(master|slave)
+# Write through RW chain:  haproxy -> acra-server-m -> pgsql-(master|slave)
 docker exec -it $DOCKER_PYTHON \
-    python /app/example.py --data="some data #1"
+    python /app/example.py --host acra-server-m --data="some data #1"
 # insert data: some data #1
 
 # Read from RO chain:  haproxy <- acra-server-(m|s) <- pgsql-(master|slave)

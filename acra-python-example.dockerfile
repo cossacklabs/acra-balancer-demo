@@ -35,8 +35,13 @@ RUN cd /root/themis \
     && make pythemis_install
 
 # acra
+# using commit instead of version/tag to use the commit with specific SqlAlchemy from examples/python
+# and some examples/python fixes
+# https://github.com/cossacklabs/acra/commit/34e162b335a3d2c248b8fd1e294c25bd5c78350e
 RUN cd /root \
-    && git clone --depth 1 -b master https://github.com/cossacklabs/acra
+    && git clone https://github.com/cossacklabs/acra /root/acra \
+    && cd /root/acra \
+    && git checkout 34e162b335a3d2c248b8fd1e294c25bd5c78350e
 
 RUN mkdir /app.requirements \
     && cp /root/acra/examples/python/requirements/* /app.requirements/

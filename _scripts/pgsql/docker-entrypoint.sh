@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# Based on official postgres/13/docker-entrypoint.sh:
+# https://github.com/docker-library/postgres/blob/master/13/alpine3.17/docker-entrypoint.sh
+
 set -Eeo pipefail
 # TODO swap to -Eeuo pipefail above (after handling all potentially-unset variables)
 

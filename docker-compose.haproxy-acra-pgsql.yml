@@ -95,6 +95,7 @@ services:
         networks:
             - acraserver-m-pgsql-master
             - haproxy-acraserver
+            - python-acraserver-m
         volumes:
             - ./.acrakeys/acra-server:/keys
             - ./.acraconfigs/acra-server-m:/config
@@ -178,6 +179,7 @@ services:
             EXAMPLE_DB_USER: ${POSTGRES_USER:-postgres}
             EXAMPLE_DB_PASSWORD: ${POSTGRES_PASSWORD:-test}
             EXAMPLE_DB_NAME: ${POSTGRES_DB:-test}
+            # sha512 of the certificate's distinguished name
             EXAMPLE_PUBLIC_KEY: "/app.acrakeys/28fa1ef8aa3184d7ce0621341299d74b5b561a95aecdee3b46b847d63495f800d276cdd1233f5950efb348113f2892ceef4b354abed383d8afc026901854ca28_storage.pub"
             EXAMPLE_SSL_MODE: verify-ca
             EXAMPLE_TLS_ROOT_CERT: /ssl/root.crt
@@ -186,6 +188,7 @@ services:
             EXAMPLE_POSTGRESQL: !!str 'true'
         networks:
             - python-haproxy
+            - python-acraserver-m
         volumes:
             - ./.acrakeys/acra-writer:/app.acrakeys:ro
 
@@ -201,4 +204,6 @@ networks:
     python-haproxy:
         internal: true
     haproxy-pgsql:
+        internal: true
+    python-acraserver-m:
         internal: true
