@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:3.15.0
 
 # Include metadata, additionally use label-schema namespace
 LABEL org.label-schema.schema-version="1.0" \
@@ -15,7 +15,7 @@ RUN echo 'root:!' | chpasswd -e
 
 RUN apk update
 
-RUN apk add --no-cache bash python3 postgresql-dev postgresql-client
+RUN apk add --no-cache bash python3 py3-pip postgresql-dev postgresql-client
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -35,8 +35,13 @@ RUN cd /root/themis \
     && make pythemis_install
 
 # acra
+# using commit instead of version/tag to use the commit with specific SqlAlchemy from examples/python
+# and some examples/python fixes
+# https://github.com/cossacklabs/acra/commit/34e162b335a3d2c248b8fd1e294c25bd5c78350e
 RUN cd /root \
-    && git clone --depth 1 -b stable https://github.com/cossacklabs/acra
+    && git clone https://github.com/cossacklabs/acra /root/acra \
+    && cd /root/acra \
+    && git checkout 34e162b335a3d2c248b8fd1e294c25bd5c78350e
 
 RUN mkdir /app.requirements \
     && cp /root/acra/examples/python/requirements/* /app.requirements/
@@ -49,6 +54,14 @@ RUN echo -e '#!/bin/sh\n\nwhile true\ndo\n\tsleep 1\ndone\n' > /entry.sh
 RUN chmod +x /entry.sh
 
 VOLUME /app.acrakeys
+
+RUN mkdir /ssl
+COPY ssl/acra-client/acra-client.crt /ssl/acra-client.crt
+COPY ssl/acra-client/acra-client.key /ssl/acra-client.key
+COPY ssl/ca/ca.crt /ssl/root.crt
+
+RUN chmod 0600 -R /ssl/
+
 
 WORKDIR /app
 ENTRYPOINT ["/entry.sh"]

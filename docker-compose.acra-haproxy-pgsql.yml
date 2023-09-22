@@ -4,60 +4,22 @@ services:
 
     #===== Keymakers ===========================================================
 
-    acra-keymaker_server:
-        image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
-        network_mode: "none"
-        environment:
-            # INSECURE!!! You MUST define your own ACRA_SERVER_MASTER_KEY and ACRA_CONNECTOR_MASTER_KEY
-            # The default is only for testing purposes
-            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
-        volumes:
-            - ./.acrakeys:/keys
-        command: >-
-            --client_id=${ACRA_CLIENT_ID:-testclientid}
-            --generate_acraserver_keys
-            --keys_output_dir=/keys/acra-server
-            --keys_public_output_dir=/keys/acra-connector
-
-    acra-keymaker_connector:
-        image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
-        network_mode: "none"
-        environment:
-            ACRA_MASTER_KEY: ${ACRA_CONNECTOR_MASTER_KEY:-MElBVnhEeTd3b29JMFVVcnhGMXJPT3BxZUVwWW5wS3E=}
-        volumes:
-            - ./.acrakeys:/keys
-        command: >-
-            --client_id=${ACRA_CLIENT_ID:-testclientid}
-            --generate_acraconnector_keys
-            --keys_output_dir=/keys/acra-connector
-            --keys_public_output_dir=/keys/acra-server
-
     acra-keymaker_writer:
-        image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-latest}"
+        image: "cossacklabs/acra-keymaker:${ACRA_DOCKER_IMAGE_TAG:-0.95.0}"
         network_mode: "none"
         environment:
             ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         volumes:
             - ./.acrakeys:/keys
+            - ./ssl/acra-client/:/ssl:ro
         command: >-
-            --client_id=${ACRA_CLIENT_ID:-testclientid}
+            --client_id=""
+            --tls_cert=/ssl/acra-client.crt
             --generate_acrawriter_keys
+            --generate_symmetric_storage_key
             --keys_output_dir=/keys/acra-server
             --keys_public_output_dir=/keys/acra-writer
-
-    acra-authmanager:
-        image: "cossacklabs/acra-authmanager:${ACRA_DOCKER_IMAGE_TAG:-latest}"
-        network_mode: "none"
-        environment:
-            ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
-        volumes:
-            - ./.acrakeys:/keys
-        command: >-
-            --set
-            --user=${ACRA_HTTPAUTH_USER:-test}
-            --password=${ACRA_HTTPAUTH_PASSWORD:-test}
-            --file=/keys/acra-server/httpauth.accounts
-            --keys_dir=/keys/acra-server/
+            --keystore=v1
 
 
     #===== Databases ===========================================================
@@ -74,26 +36,50 @@ services:
             POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-2QTkGNGuxEC25viP}
         ports:
             - "5434:5432"
-            - "9001:9000"
         networks:
             - haproxy-pgsql
             - world
+            - acraserver-haproxy
+
+    pgsql-replication-setup:
+        depends_on:
+            - pgsql-master
+        build:
+            context: ./
+            dockerfile: replication-setup.dockerfile
+        environment:
+            POSTGRES_HOST: ${POSTGRES_HOST:-pgsql-master}
+            POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test}
+            POSTGRES_REPLICATION_USER: ${POSTGRES_REPLICATION_USER:-replica}
+            POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-2QTkGNGuxEC25viP}
+            POSTGRES_REPLICATION_MASTER_HOST: pgsql-master
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data/
+        networks:
+            - haproxy-pgsql
+
 
     pgsql-slave:
         depends_on:
-          - pgsql-master
+            pgsql-replication-setup:
+              condition:
+                  service_completed_successfully
         build:
             context: ./
-            dockerfile: pgsql-replication.dockerfile
+            dockerfile: pgsql-slave.dockerfile
+        volumes:
+            - ./pgdata:/var/lib/postgresql/data/
         environment:
             POSTGRES_USER: ${POSTGRES_USER:-postgres}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-test}
             POSTGRES_REPLICATION_USER: ${POSTGRES_REPLICATION_USER:-replica}
             POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD:-2QTkGNGuxEC25viP}
             POSTGRES_REPLICATION_MASTER_HOST: pgsql-master
+            DATABASE_ALREADY_EXISTS: "true"
         ports:
             - "5435:5432"
-            - "9002:9000"
         networks:
             - haproxy-pgsql
             - world
@@ -103,7 +89,6 @@ services:
 
     haproxy:
         depends_on:
-          - pgsql-master
           - pgsql-slave
         build:
             context: ./
@@ -117,78 +102,40 @@ services:
             - haproxy-pgsql
             - world
             - acraserver-haproxy
-            - python-haproxy
 
 
     #===== Acra ================================================================
 
     acra-server:
-        image: "cossacklabs/acra-server:${ACRA_DOCKER_IMAGE_TAG:-latest}"
+        image: "cossacklabs/acra-server:${ACRA_DOCKER_IMAGE_TAG:-0.95.0}"
         restart: always
         depends_on:
-            - acra-keymaker_server
-            - acra-keymaker_connector
-            - acra-keymaker_writer
             - haproxy
         environment:
             ACRA_MASTER_KEY: ${ACRA_SERVER_MASTER_KEY:-N0MyZEVCRGY1cHA4ODRSVHp3c3BNeGtDekxaV3BhTHI=}
         networks:
             - acraserver-haproxy
-            - acraconnector-acraserver
+            - python-acraserver
         volumes:
             - ./.acrakeys/acra-server:/keys
             - ./.acraconfigs/acra-server:/config
+            - ./ssl/acra-server/:/ssl
+        # explicitly specify PostgreSQL's SNI (tls_database_sni) due to acra connects to the haproxy by domain
+        # and it will proxy pgsql's TLS handshake as is with pgsql's certificate
         command: >-
             --db_host=haproxy
             --db_port=5432
             --keys_dir=/keys
-            --auth_keys=/keys/httpauth.accounts
-            --http_api_enable
-            --incoming_connection_api_string=tcp://0.0.0.0:9090
+            --tls_auth=4
+            --tls_ca=/ssl/root.crt
+            --tls_cert=/ssl/acra-server.crt
+            --tls_key=/ssl/acra-server.key
+            --tls_client_id_from_cert
+            --tls_database_sni=pgsql
+            --tls_identifier_extractor_type=distinguished_name
             --config_file=/config/acra-server.yaml
-            -v
-
-
-    acra-connector:
-        image: "cossacklabs/acra-connector:${ACRA_DOCKER_IMAGE_TAG:-latest}"
-        restart: always
-        depends_on:
-            - acra-keymaker_server
-            - acra-keymaker_connector
-            - acra-server
-        ports:
-            - "9494:9494"
-        environment:
-            ACRA_MASTER_KEY: ${ACRA_CONNECTOR_MASTER_KEY:-MElBVnhEeTd3b29JMFVVcnhGMXJPT3BxZUVwWW5wS3E=}
-        networks:
-            - acraconnector-acraserver
-            - acrawebconfig-acraconnector
-            - python-acraconnector
-            - world
-        volumes:
-            - ./.acrakeys/acra-connector:/keys:ro
-        command: >-
-            --acraserver_connection_host=acra-server
-            --keys_dir=/keys
-            --client_id=${ACRA_CLIENT_ID:-testclientid}
-            --incoming_connection_string=tcp://0.0.0.0:9494
-            --http_api_enable
-            --incoming_connection_api_string=tcp://0.0.0.0:9191
-            -v
-
-    acra-webconfig:
-        image: "cossacklabs/acra-webconfig:${ACRA_DOCKER_IMAGE_TAG:-latest}"
-        restart: on-failure
-        depends_on:
-            - acra-connector
-        ports:
-            - "8000:8000"
-        networks:
-            - acrawebconfig-acraconnector
-            - world
-        command: >-
-            --destination_host=acra-connector
-            --incoming_connection_host=0.0.0.0
+            --v
+            --d
 
 
     #===== Example client ==========================================================
@@ -197,30 +144,30 @@ services:
         depends_on:
             - acra-keymaker_writer
             - haproxy
-            - acra-connector
         build:
             context: ./
             dockerfile: acra-python-example.dockerfile
         environment:
-            # Direct connection to DB
-            DB_HOST: haproxy
-            DB_PORT: 5432
-            # Connectin through AcraConnector
-            ACRA_CLIENT_ID: ${ACRA_CLIENT_ID:-testclientid}
-            ACRA_CONNECTOR_HOST: acra-connector
-            ACRA_CONNECTOR_PORT: 9494
+#            # Direct connection to DB
+#            DB_HOST: haproxy
+#            DB_PORT: 5432
             # Demo script default cofiguration
-            EXAMPLE_ACRA_CONNECTOR_API_ADDRESS: http://acra-connector:9191
-            EXAMPLE_HOST: acra-connector
-            EXAMPLE_PORT: 9494
+            EXAMPLE_ACRA_SERVER_API_ADDRESS: http://acra-server:9090
+            EXAMPLE_HOST: acra-server
+            EXAMPLE_PORT: 9393
             EXAMPLE_DB_USER: ${POSTGRES_USER:-postgres}
             EXAMPLE_DB_PASSWORD: ${POSTGRES_PASSWORD:-test}
             EXAMPLE_DB_NAME: ${POSTGRES_DB:-test}
-            EXAMPLE_PUBLIC_KEY: "/app.acrakeys/${ACRA_CLIENT_ID:-testclientid}_storage.pub"
+            # sha512 of the certificate's distinguished name
+            EXAMPLE_PUBLIC_KEY: "/app.acrakeys/28fa1ef8aa3184d7ce0621341299d74b5b561a95aecdee3b46b847d63495f800d276cdd1233f5950efb348113f2892ceef4b354abed383d8afc026901854ca28_storage.pub"
+            EXAMPLE_SSL_MODE: verify-full
+            EXAMPLE_TLS_ROOT_CERT: /ssl/root.crt
+            EXAMPLE_TLS_KEY: /ssl/acra-client.key
+            EXAMPLE_TLS_CERT: /ssl/acra-client.crt
             EXAMPLE_POSTGRESQL: !!str 'true'
         networks:
             - python-haproxy
-            - python-acraconnector
+            - python-acraserver
         volumes:
             - ./.acrakeys/acra-writer:/app.acrakeys:ro
 
@@ -231,11 +178,7 @@ networks:
         internal: true
     acraserver-haproxy:
         internal: true
-    acraconnector-acraserver:
-        internal: true
-    acrawebconfig-acraconnector:
-        internal: true
     python-haproxy:
         internal: true
-    python-acraconnector:
+    python-acraserver:
         internal: true

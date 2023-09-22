@@ -24,27 +24,15 @@ defaults
 
 listen acraserver-rw
     bind *:9393
-    option httpchk GET /
-    http-check expect string OK\ :\ master
     balance roundrobin
-    default-server port 9000 inter 2s downinter 5s rise 3 fall 2 slowstart 60s maxconn 256 maxqueue 128 weight 100
-    server acra-server-m acra-server-m:9393 addr pgsql-master check
-    server acra-server-s acra-server-s:9393 addr pgsql-slave check
+    server acra-server-m acra-server-m:9393
+    server acra-server-s acra-server-s:9393
 
 listen acraserver-ro
     bind *:9394
-    option httpchk GET /
-    http-check expect string OK\ :
     balance roundrobin
-    default-server port 9000 inter 2s downinter 5s rise 3 fall 2 slowstart 60s maxconn 256 maxqueue 128 weight 100
-    server acra-server-m acra-server-m:9393 addr pgsql-master check
-    server acra-server-s acra-server-s:9393 addr pgsql-slave check
-
-listen acraserver-api
-    bind *:9090
-    balance roundrobin
-    server acra-server-m acra-server-m:9090
-    server acra-server-s acra-server-s:9090
+    server acra-server-m acra-server-m:9393
+    server acra-server-s acra-server-s:9393
 EOF
 
 /sbin/syslogd -O /proc/1/fd/1
